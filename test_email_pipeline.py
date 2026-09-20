@@ -22,9 +22,12 @@ with patch('builtins.input', side_effect=mock_inputs), \
      
      print("🤖 System: Simulating dynamic user environment...")
      
-     # Dynamically import and run your code
+     # Generate the ignored fixture and run the CLI explicitly.
      try:
-         import src.batch_predict
+         import generate_batch_data
+         from src.batch_predict import main
+
+         main()
          print("\n✅ SUCCESS: The structural code syntax and operational loops are PERFECT.")
          print("💡 Verification Complete: If given a real App Password, this code will deliver emails flawlessly.")
      except Exception as e:

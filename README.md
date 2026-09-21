@@ -1,6 +1,6 @@
 # Credit Card Delinquency Prediction
 
-[![Quality checks](https://github.com/thotashashank302/Delinquency-Prediction-Model-With-AI-AGENT/actions/workflows/ci.yml/badge.svg)](https://github.com/thotashashank302/Delinquency-Prediction-Model-With-AI-AGENT/actions/workflows/ci.yml)
+[![Quality checks](https://github.com/thotashashank302/Delinquency-Prediction-Model-With-AI-AGENT/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/thotashashank302/Delinquency-Prediction-Model-With-AI-AGENT/actions/workflows/ci.yml?query=branch%3Amain)
 
 A portfolio-grade, end-to-end tabular machine-learning project that estimates
 the probability of next-month credit-card payment default. It demonstrates

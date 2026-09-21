@@ -15,3 +15,4 @@ data/*_output.csv
 .env.*
 *.secrets
 .DS_Store
+models/*.json

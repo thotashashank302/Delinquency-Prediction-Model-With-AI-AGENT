@@ -8,8 +8,14 @@ from src.common import FEATURE_NAMES, classify_risk, validate_feature_columns
 
 @pytest.mark.parametrize(
     ("probability", "expected"),
-    [(0.0, "Low Risk"), (0.299999, "Low Risk"), (0.30, "Moderate Risk"),
-     (0.699999, "Moderate Risk"), (0.70, "High Risk"), (1.0, "High Risk")],
+    [
+        (0.0, "Low Risk"),
+        (0.299999, "Low Risk"),
+        (0.30, "Moderate Risk"),
+        (0.699999, "Moderate Risk"),
+        (0.70, "High Risk"),
+        (1.0, "High Risk"),
+    ],
 )
 def test_classify_risk_boundaries(probability, expected):
     assert classify_risk(probability) == expected

@@ -8,7 +8,8 @@ print("🧪 STARTING PIPELINE VALIDATION SUB-ROUTINE...")
 mock_inputs = [
     "test_operator@gmail.com",           # 1. Operator Email
     "data/user_uploaded_applicants.csv", # 2. Dataset path (Now correctly sequenced!)
-    "yes"                                # 3. Grant permission for the Moderate Risk row
+    "yes",                              # 3. Grant permission for first Moderate Risk row
+    "no",                               # 4. Decline the next Moderate Risk reminder
 ]
 
 # We use 'patch' to safely intercept live network calls and terminal inputs

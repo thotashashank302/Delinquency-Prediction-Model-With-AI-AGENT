@@ -10,9 +10,23 @@ import numpy as np
 import pandas as pd
 
 try:
-    from src.common import FEATURE_NAMES, MODEL_PATH, REPO_ROOT, SCALER_PATH, classify_risk, validate_feature_columns
+    from src.common import (
+        FEATURE_NAMES,
+        MODEL_PATH,
+        REPO_ROOT,
+        SCALER_PATH,
+        classify_risk,
+        validate_feature_columns,
+    )
 except ModuleNotFoundError:  # Supports the existing ``python src/batch_predict.py`` workflow.
-    from common import FEATURE_NAMES, MODEL_PATH, REPO_ROOT, SCALER_PATH, classify_risk, validate_feature_columns
+    from common import (
+        FEATURE_NAMES,
+        MODEL_PATH,
+        REPO_ROOT,
+        SCALER_PATH,
+        classify_risk,
+        validate_feature_columns,
+    )
 
 
 def prepare_report(frame: pd.DataFrame, model, scaler) -> pd.DataFrame:
@@ -25,10 +39,22 @@ def prepare_report(frame: pd.DataFrame, model, scaler) -> pd.DataFrame:
     return report
 
 
-def send_reminder(sender_email: str, sender_password: str, smtp_server: str, customer_email: str) -> None:
+def send_reminder(
+    sender_email: str, sender_password: str, smtp_server: str, customer_email: str
+) -> None:
     msg = MIMEMultipart()
-    msg["From"], msg["To"], msg["Subject"] = sender_email, customer_email, "Urgent Account Notice: Financial Health Check-In"
-    msg.attach(MIMEText("Dear Customer,\n\nPlease review your outstanding balance statements.\n\nBest Regards,\nCredit Risk Automation Desk", "plain"))
+    msg["From"], msg["To"], msg["Subject"] = (
+        sender_email,
+        customer_email,
+        "Urgent Account Notice: Financial Health Check-In",
+    )
+    msg.attach(
+        MIMEText(
+            "Dear Customer,\n\nPlease review your outstanding balance statements."
+            "\n\nBest Regards,\nCredit Risk Automation Desk",
+            "plain",
+        )
+    )
     with smtplib.SMTP(smtp_server, 587) as server:
         server.starttls(context=ssl.create_default_context())
         server.login(sender_email, sender_password)
@@ -39,7 +65,9 @@ def main() -> None:
     try:
         model, scaler = joblib.load(MODEL_PATH), joblib.load(SCALER_PATH)
     except FileNotFoundError as exc:
-        raise SystemExit(f"❌ Missing model asset: {exc.filename}. Run 'python -m src.train' first.") from exc
+        raise SystemExit(
+            f"❌ Missing model asset: {exc.filename}. Run 'python -m src.train' first."
+        ) from exc
     sender_email = input("✉️ Enter YOUR email address (to send from): ").strip()
     sender_password = getpass.getpass("🔑 Enter your App Password (hidden): ").strip()
     if "@gmail.com" in sender_email.lower():
@@ -55,9 +83,12 @@ def main() -> None:
         report = prepare_report(pd.read_csv(input_path), model, scaler)
     except (pd.errors.ParserError, ValueError) as exc:
         raise SystemExit(f"❌ Validation Error: {exc}") from exc
-    print(report[["Email", "Delinquency_Probability_%", "Assessed_Risk_Level"]].to_string(index=False))
+    print(
+        report[["Email", "Delinquency_Probability_%", "Assessed_Risk_Level"]].to_string(index=False)
+    )
     for _, row in report[report["Assessed_Risk_Level"] == "Moderate Risk"].iterrows():
-        if input(f"❓ Send a reminder to {row['Email']}? (yes/no): ").strip().lower() in {"yes", "y"}:
+        approved = input(f"❓ Send a reminder to {row['Email']}? (yes/no): ")
+        if approved.strip().lower() in {"yes", "y"}:
             try:
                 send_reminder(sender_email, sender_password, smtp_server, row["Email"])
             except (OSError, smtplib.SMTPException) as exc:

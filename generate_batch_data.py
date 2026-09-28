@@ -1,10 +1,15 @@
 import pandas as pd
+from pathlib import Path
+
+# Resolve output path relative to this file, not the CWD
+REPO_ROOT = Path(__file__).resolve().parent
+OUTPUT_PATH = REPO_ROOT / "data" / "user_uploaded_applicants.csv"
 
 # The 23 mathematical features the model expects
 feature_names = [
-    'LIMIT_BAL', 'SEX', 'EDUCATION', 'MARRIAGE', 'AGE', 
-    'PAY_0', 'PAY_2', 'PAY_3', 'PAY_4', 'PAY_5', 'PAY_6', 
-    'BILL_AMT1', 'BILL_AMT2', 'BILL_AMT3', 'BILL_AMT4', 'BILL_AMT5', 'BILL_AMT6', 
+    'LIMIT_BAL', 'SEX', 'EDUCATION', 'MARRIAGE', 'AGE',
+    'PAY_0', 'PAY_2', 'PAY_3', 'PAY_4', 'PAY_5', 'PAY_6',
+    'BILL_AMT1', 'BILL_AMT2', 'BILL_AMT3', 'BILL_AMT4', 'BILL_AMT5', 'BILL_AMT6',
     'PAY_AMT1', 'PAY_AMT2', 'PAY_AMT3', 'PAY_AMT4', 'PAY_AMT5', 'PAY_AMT6'
 ]
 
@@ -17,10 +22,11 @@ mock_applicants = [
 # Create the base DataFrame
 df_batch = pd.DataFrame(mock_applicants, columns=feature_names)
 
-# 🎯 NEW: Insert enterprise identification data at the front of the file
+# Insert enterprise identification data at the front
 df_batch.insert(0, 'Customer_Name', ['Alex Jones', 'Sam Smith', 'Taylor Swift'])
 df_batch.insert(1, 'Email', ['alex.jones@gmail.com', 'sam.smith@yahoo.com', 'taylor.swift@reputation.com'])
 
-# Save it out as our new user upload file
-df_batch.to_csv("data/user_uploaded_applicants.csv", index=False)
-print("📁 Production test file created at: data/user_uploaded_applicants.csv")
+# Ensure output directory exists and save
+OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
+df_batch.to_csv(OUTPUT_PATH, index=False)
+print(f"📁 Production test file created at: {OUTPUT_PATH}")

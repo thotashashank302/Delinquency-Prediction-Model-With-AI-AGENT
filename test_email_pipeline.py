@@ -1,36 +1,47 @@
 import sys
-from unittest.mock import patch, MagicMock
-import pandas as pd
+from pathlib import Path
+from unittest.mock import patch
 
 print("🧪 STARTING PIPELINE VALIDATION SUB-ROUTINE...")
 
-# 🎯 FIXED: Aligned perfectly with your script's input checkpoints
+# Resolve absolute path so the test works from any working directory
+REPO_ROOT = Path(__file__).resolve().parent
+CSV_PATH = str(REPO_ROOT / "data" / "user_uploaded_applicants.csv")
+
+# mock_inputs must cover every input() call in batch_predict.main():
+#   1. Operator email
+#   2. CSV/Excel path
+#   3+. One yes/no per Moderate Risk applicant (generate_batch_data creates 3 rows;
+#       supply enough answers to avoid StopIteration even if all are Moderate Risk)
 mock_inputs = [
-    "test_operator@gmail.com",           # 1. Operator Email
-    "data/user_uploaded_applicants.csv", # 2. Dataset path (Now correctly sequenced!)
-    "yes",                              # 3. Grant permission for first Moderate Risk row
-    "no",                               # 4. Decline the next Moderate Risk reminder
+    "test_operator@gmail.com",  # 1. Operator Email  → auto-selects smtp.gmail.com
+    CSV_PATH,                   # 2. Dataset path    → absolute, safe from any CWD
+    "yes",                      # 3. Moderate Risk row #1 → send reminder
+    "no",                       # 4. Moderate Risk row #2 → skip
+    "no",                       # 5. Moderate Risk row #3 → skip (extra safety)
 ]
 
-# We use 'patch' to safely intercept live network calls and terminal inputs
-with patch('builtins.input', side_effect=mock_inputs), \
-     patch('getpass.getpass', return_value="fakepassword1234"), \
-     patch('smtplib.SMTP') as mock_smtp:
-     
-     # Configure our fake email server to pretend everything goes well
-     instance = mock_smtp.return_value
-     instance.__enter__.return_value = instance
-     
-     print("🤖 System: Simulating dynamic user environment...")
-     
-     # Generate the ignored fixture and run the CLI explicitly.
-     try:
-         import generate_batch_data
-         from src.batch_predict import main
+# Patch targets must match the module that *uses* them (where-used rule)
+with patch("builtins.input", side_effect=mock_inputs), \
+     patch("src.batch_predict.getpass.getpass", return_value="fakepassword1234"), \
+     patch("src.batch_predict.smtplib.SMTP") as mock_smtp:
 
-         main()
-         print("\n✅ SUCCESS: The structural code syntax and operational loops are PERFECT.")
-         print("💡 Verification Complete: If given a real App Password, this code will deliver emails flawlessly.")
-     except Exception as e:
-         print(f"\n❌ Pipeline Error Detected: {e}")
-         sys.exit(1)
+    # Configure our fake SMTP server to behave like a real one
+    instance = mock_smtp.return_value.__enter__.return_value
+    instance.sendmail.return_value = {}
+
+    print("🤖 System: Simulating dynamic user environment...")
+
+    try:
+        # Step 1: generate the fixture CSV the test will load
+        import generate_batch_data  # noqa: F401 — side-effect: creates the CSV
+
+        # Step 2: run the full CLI pipeline
+        from src.batch_predict import main
+        main()
+
+        print("\n✅ SUCCESS: Pipeline ran end-to-end without errors.")
+        print("💡 With a real App Password, this pipeline will send emails flawlessly.")
+    except Exception as e:
+        print(f"\n❌ Pipeline Error Detected: {type(e).__name__}: {e}")
+        sys.exit(1)

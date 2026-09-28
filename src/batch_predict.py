@@ -76,12 +76,23 @@ def main() -> None:
         smtp_server = "smtp.office365.com"
     else:
         smtp_server = input("🌐 Enter your SMTP server: ").strip()
-    input_path = Path(input("📥 Enter your CSV path: ").strip().strip("'\" "))
+    input_path = Path(input("📥 Enter your CSV/Excel path: ").strip().strip("'\" "))
     if not input_path.is_file():
         raise SystemExit(f"❌ Error: Could not find file at '{input_path}'.")
     try:
-        report = prepare_report(pd.read_csv(input_path), model, scaler)
-    except (pd.errors.ParserError, ValueError) as exc:
+        suffix = input_path.suffix.lower()
+        if suffix in (".xlsx", ".xls"):
+            frame = pd.read_excel(input_path)
+        elif suffix == ".csv":
+            frame = pd.read_csv(input_path)
+        else:
+            raise SystemExit(
+                f"❌ Unsupported file type '{suffix}'. "
+                "Please provide a .csv or .xlsx file.\n"
+                "Tip: In Apple Numbers, go to File → Export To → CSV to convert .numbers files."
+            )
+        report = prepare_report(frame, model, scaler)
+    except (pd.errors.ParserError, ValueError, UnicodeDecodeError) as exc:
         raise SystemExit(f"❌ Validation Error: {exc}") from exc
     print(
         report[["Email", "Delinquency_Probability_%", "Assessed_Risk_Level"]].to_string(index=False)
@@ -93,8 +104,14 @@ def main() -> None:
                 send_reminder(sender_email, sender_password, smtp_server, row["Email"])
             except (OSError, smtplib.SMTPException) as exc:
                 print(f"❌ Mail Error: {exc}")
-    output_path = REPO_ROOT / "data" / f"evaluated_{input_path.name}"
-    report.to_csv(output_path, index=False)
+    output_dir = REPO_ROOT / "data"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    if suffix in (".xlsx", ".xls"):
+        output_path = output_dir / f"evaluated_{input_path.stem}.xlsx"
+        report.to_excel(output_path, index=False)
+    else:
+        output_path = output_dir / f"evaluated_{input_path.stem}.csv"
+        report.to_csv(output_path, index=False)
     print(f"💾 Evaluated file saved to: {output_path}")
 
 

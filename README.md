@@ -55,7 +55,12 @@ models/model_metadata.json
 ```
 
 The training run uses a stratified holdout split, a fixed random seed, class
-balancing, and a `0.35` probability threshold chosen to emphasize recall.
+balancing, and a `0.35` probability threshold for binary evaluation metrics.
+
+Single-customer and batch predictions use the same risk bands: below 30% is
+`Low Risk`, 30% to below 70% is `Moderate Risk`, and 70% or above is `High Risk`.
+The single-customer command displays the probability and risk level. It does
+not approve or deny credit applications.
 
 ## Batch input schema
 

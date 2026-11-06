@@ -21,10 +21,14 @@ customer-contact decision system.
 
 ## Evaluation
 
-The default-class decision threshold is `0.35`, selected to prioritize recall
-over the default `0.50` threshold. Training reports accuracy, precision, recall,
+The binary evaluation threshold is fixed at `0.35`; it has not been optimized
+on validation data. Training reports accuracy, precision, recall,
 ROC-AUC, average precision, and a confusion matrix. Run `python -m src.train`
 to regenerate the metrics for the checked-in dataset.
+
+Single-customer and batch predictions report `Low Risk` below 30%,
+`Moderate Risk` from 30% to below 70%, and `High Risk` at 70% or above.
+The single-customer command does not approve or deny credit applications.
 
 Metrics are estimates from one stratified holdout split. They are not a
 guarantee of performance on new populations or future time periods.

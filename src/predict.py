@@ -3,18 +3,18 @@ import pandas as pd
 
 try:
     from src.common import (
-        DEFAULT_RISK_THRESHOLD,
         FEATURE_NAMES,
         MODEL_PATH,
         SCALER_PATH,
+        classify_risk,
         validate_feature_columns,
     )
 except ModuleNotFoundError:  # Supports the existing ``python src/predict.py`` workflow.
     from common import (
-        DEFAULT_RISK_THRESHOLD,
         FEATURE_NAMES,
         MODEL_PATH,
         SCALER_PATH,
+        classify_risk,
         validate_feature_columns,
     )
 
@@ -59,12 +59,7 @@ def main() -> None:
     probability = model.predict_proba(scaler.transform(customer))[0, 1]
     print("\n--- 📊 RISK ASSESSMENT REPORT ---")
     print(f"👉 Default Probability Calculated: {probability * 100:.2f}%")
-    print(f"👉 Operational Risk Threshold:     {DEFAULT_RISK_THRESHOLD * 100:.2f}%")
-    print(
-        "❌ ALERT: Credit Application DENIED."
-        if probability >= DEFAULT_RISK_THRESHOLD
-        else "💚 SUCCESS: Credit Application APPROVED."
-    )
+    print(f"👉 Assessed Risk Level: {classify_risk(probability)}")
 
 
 if __name__ == "__main__":
